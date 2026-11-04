@@ -1,0 +1,85 @@
+name: Test and Coverage
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
+  actions: read
+
+concurrency:
+  group: build-test-cover-${{ github.event.pull_request.number || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      # Expose matched filters as job 'src' output variable
+      paths: ${{ steps.filter.outputs.changes }}
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        with:
+          disable-sudo: true
+          egress-policy: block
+          allowed-endpoints: >
+            api.github.com:443
+            github.com:443
+
+      - name: Checkout (push/workflow_dispatch only)
+        if: github.event_name != 'pull_request_target'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
+        id: filter
+        with:
+          filters: |
+            src:
+              - '!**/**.md'
+
+  go-test:
+    runs-on: ubuntu-latest
+    needs: changes
+    if: ${{ contains(fromJSON(needs.changes.outputs.paths), 'src') }}
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        with:
+          egress-policy: block
+          allowed-endpoints: >
+            pypi.org:443
+            files.pythonhosted.org:443
+            api.github.com:443
+            github.com:443
+            golang.org:443
+            go.dev:443
+            proxy.golang.org:443
+            sum.golang.org:443
+            *.githubusercontent.com:443
+            storage.googleapis.com:443
+            cli.codecov.io:443
+            api.codecov.io:443
+            ingest.codecov.io:443
+            dl.k8s.io:443
+            cdn.dl.k8s.io:443
+            mise.jdx.dev:443
+            mise-versions.jdx.dev:443
+            tuf-repo-cdn.sigstore.dev:443
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Mise
+        uses: jdx/mise-action@dba19683ed58901619b14f395a24841710cb4925 # v4.1.0
+
+      - name: Test
+        run: mise run test

@@ -1,0 +1,58 @@
+[settings]
+minimum_release_age = "7d"  # only install versions released more than 7 days ago - https://mise.en.dev/security.html#minimum-release-age
+
+[tools]
+go = "1.27.3"
+ko = "0.18.1"
+kubectl = "1.35.5"
+"go:golang.org/x/vuln/cmd/govulncheck" = "1.8.0"
+golangci-lint = "2.15.0"
+
+
+[tasks.check]
+description = "[check] Run fmt, vet, and lint; formats Go sources and builds bin/golangci-lint-custom if absent."
+run = [{ task = "fmt" }, { task = "vet" }, { task = "lint" }]
+
+[tasks.verify]
+description = "[verify] Run lint, nilcheck, vulncheck, test, and build; regenerates and formats files."
+run = [{ task = "lint" }, { task = "nilcheck" }, { task = "vulncheck" }, { task = "test" }, { task = "build" }]
+
+[tasks.fmt]
+description = "[check] Format Go sources in place."
+run = "make fmt"
+
+[tasks.vet]
+description = "[check] Run go vet."
+run = "make vet"
+
+[tasks.lint]
+description = "[check] Run golangci-lint."
+run = "make lint"
+
+[tasks.vulncheck]
+description = "[verify] Run govulncheck (requires network)."
+run = "make vulncheck"
+
+[tasks.test]
+description = "[verify] Regenerate and format code, then run race-enabled unit tests; writes cover.out."
+run = "make test"
+
+[tasks.build]
+description = "[verify] Regenerate and format code, then build bin/manager."
+run = "make build"
+
+[tasks.tidy]
+description = "[dev] Run go mod tidy. Mutates go.mod and go.sum; needs network."
+run = "make tidy"
+
+[tasks.nilcheck]
+description = "[verify] Run nilaway; builds bin/golangci-lint-custom if absent."
+run = "make nilcheck"
+
+[tasks.ko-build]
+description = "[dev] Build the controller image locally with ko. Does not push."
+run = "make ko-build"
+
+[tasks.ko-publish]
+description = "[dev] Build and push the controller image to KO_DOCKER_REPO. Publishes; run only when asked."
+run = "make ko-publish"
