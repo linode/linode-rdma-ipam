@@ -8,9 +8,9 @@ it on every boot, instead of drawing from an address pool.
 ## Development
 
 ```sh
-make check   # gofmt + go vet + go test ./...
-make build   # static Linux binary at bin/linode-rdma-ipam
-make cover   # test coverage report
+mise check   # gofmt + go vet + go test ./...
+mise build   # static Linux binary at bin/linode-rdma-ipam
+mise cover   # test coverage report
 ```
 
 Developed and tested against Go 1.26.5 on Linux. The core packages
@@ -20,9 +20,7 @@ where this plugin actually executes as a real CNI invocation.
 
 ## Deployment
 
-1. Build the image: `make docker-build` (see `Dockerfile` - multi-stage,
-   final stage is `busybox` rather than `scratch` since the install
-   `DaemonSet`'s initContainer needs a `cp` binary to copy the plugin out).
+1. Build the image: `mise ko-build`
 2. Get the image onto both cluster nodes. For this small, bespoke 2-node
    cluster (no existing registry), build locally and `ctr image import` it
    directly onto each node rather than pushing to a registry - a
