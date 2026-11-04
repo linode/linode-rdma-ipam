@@ -102,5 +102,9 @@ func cmdDel(_ *skel.CmdArgs) error {
 }
 
 func main() {
-	skel.PluginMain(cmdAdd, cmdCheck, cmdDel, version.All, "linode-rdma-ipam")
+	skel.PluginMainFuncs(skel.CNIFuncs{
+		Add:   cmdAdd,
+		Check: cmdCheck,
+		Del:   cmdDel,
+	}, version.All, "linode-rdma-ipam")
 }

@@ -1,3 +1,4 @@
+//nolint:paralleltest // The CNI command test helpers swap process-global os.Stdout.
 package main
 
 import (
@@ -30,11 +31,11 @@ func netConfJSON(t *testing.T, networkDir string) []byte {
 			"networkDir": networkDir,
 		},
 	}
-	b, err := json.Marshal(conf)
+	configBytes, err := json.Marshal(conf)
 	if err != nil {
 		t.Fatalf("marshal conf: %v", err)
 	}
-	return b
+	return configBytes
 }
 
 func TestCmdAdd_Success(t *testing.T) {
@@ -100,7 +101,7 @@ func TestCmdAdd_DefaultsNetworkDirWhenUnset(t *testing.T) {
 			"type": "linode-rdma-ipam",
 		},
 	}
-	b, err := json.Marshal(conf)
+	configBytes, err := json.Marshal(conf)
 	if err != nil {
 		t.Fatalf("marshal conf: %v", err)
 	}
@@ -108,7 +109,7 @@ func TestCmdAdd_DefaultsNetworkDirWhenUnset(t *testing.T) {
 	args := &skel.CmdArgs{
 		ContainerID: "testcontainer",
 		IfName:      "rdma0",
-		StdinData:   b,
+		StdinData:   configBytes,
 	}
 
 	// With no fixture present at the real default dir for this made-up
