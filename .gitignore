@@ -1,0 +1,13 @@
+.DS_Store
+.idea
+bin/*
+kind-logs-*
+cover.out*
+kubeconfig*
+release/*
+.envrc
+vendor/
+.vscode/
+.tool-versions
+.opencode/
+.worktrees/
