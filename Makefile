@@ -68,7 +68,7 @@ help: ## Display this help.
 
 .PHONY: build
 build: fmt vet ## Build manager binary.
-	go build -ldflags="-X github.com/linode/linode-rdma-ipam/version.version=$(VERSION)" -o /linode-rdma-ipam .
+	go build -ldflags="-X github.com/linode/linode-rdma-ipam/version.version=$(VERSION)" -o ./bin/linode-rdma-ipam .
 
 .PHONY: ko-build
 ko-build:

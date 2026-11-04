@@ -167,12 +167,12 @@ formatters:
         - default
         - blank
         - dot
-        - prefix(linode-rdma-ipam)
+        - prefix(github.com/linode/linode-rdma-ipam)
     gofmt:
       simplify: true
     goimports:
       local-prefixes:
-        - linode-rdma-ipam
+        - github.com/linode/linode-rdma-ipam
   exclusions:
     generated: lax
     paths:

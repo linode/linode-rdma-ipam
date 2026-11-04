@@ -1,4 +1,4 @@
-module linode-rdma-ipam
+module github.com/linode/linode-rdma-ipam
 
 go 1.27.0
 

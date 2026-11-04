@@ -10,7 +10,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"linode-rdma-ipam/pkg/networkd"
+	"github.com/linode/linode-rdma-ipam/pkg/networkd"
 )
 
 // DefaultNetworkdDir is where Linode's Network Helper writes per-interface

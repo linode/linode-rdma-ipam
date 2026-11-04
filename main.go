@@ -20,7 +20,7 @@ import (
 	types100 "github.com/containernetworking/cni/pkg/types/100"
 	"github.com/containernetworking/cni/pkg/version"
 
-	"linode-rdma-ipam/pkg/ipam"
+	"github.com/linode/linode-rdma-ipam/pkg/ipam"
 )
 
 // ipamArgs holds the fields this plugin reads from the "ipam" sub-object of
