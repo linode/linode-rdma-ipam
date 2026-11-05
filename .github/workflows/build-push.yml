@@ -64,5 +64,5 @@ jobs:
       - name: Publish image with ko
         env:
           KO_DOCKER_REPO: docker.io/linode/linode-rdma-ipam
-          IMAGE_VERSION: ${{ github.ref_name }}
+          IMAGE_TAGS: ${{ startsWith(github.ref, 'refs/tags/') && format('{0},latest', github.ref_name) || github.ref_name }}
         run: mise run ko-publish

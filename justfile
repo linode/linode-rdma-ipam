@@ -1,10 +1,7 @@
 # top-level justfile for linode-rdma-ipam
-
-set shell := ["bash", "-e", "-o", "pipefail", "-c"]
-
-DEFAULT_VERSION := `git describe --always --tag --dirty=-dev`
-VERSION := env_var_or_default("VERSION", DEFAULT_VERSION)
-IMAGE_TAGS := env_var_or_default("IMAGE_TAGS", VERSION)
+## Image tags to publish; defaults to the current branch name when unset
+IMAGE_TAGS := env("IMAGE_TAGS", "")
+IMAGE_VERSION := env("IMAGE_VERSION", "")
 KO_DOCKER_REPO := env_var_or_default("KO_DOCKER_REPO", "docker.io/linode/linode-rdma-ipam")
 KOCACHE := env_var_or_default("KOCACHE", home_directory() + "/.ko")
 DEFAULT_DOCKER_HOST := `docker context inspect --format '{{.Endpoints.docker.Host}}'`
@@ -16,8 +13,10 @@ NILAWAY := env_var_or_default("NILAWAY", LOCALBIN + "/nilaway")
 GOLANGCI_LINT_CUSTOM := env_var_or_default("GOLANGCI_LINT_CUSTOM", CACHE_BIN + "/golangci-lint-custom")
 NILAWAY_VERSION := env_var_or_default("NILAWAY_VERSION", "d2274102dc2eab9f77cef849a5470a6ebf983125")
 
+ONESHELL:
+
 # Run checks and build the binary.
-default: all
+default: help
 all: check build
 
 # Display the available recipes.
@@ -33,20 +32,23 @@ build: fmt vet
 
 # Build the image locally with ko.
 ko-build:
-    DOCKER_HOST={{quote(DOCKER_HOST)}} KOCACHE={{quote(KOCACHE)}} ko build --local -t {{quote(IMAGE_TAGS)}} --bare github.com/linode/linode-rdma-ipam
+    tags="{{ IMAGE_TAGS }}"
+    if [ -z "$tags" ]; then; tags=$(git rev-parse --abbrev-ref HEAD); fi
+    DOCKER_HOST={{quote(DOCKER_HOST)}} KOCACHE={{quote(KOCACHE)}} ko build --local -t "$tags" --bare github.com/linode/linode-rdma-ipam
 
 # Build and push the image with ko.
 ko-publish:
-    KOCACHE={{quote(KOCACHE)}} KO_DOCKER_REPO={{quote(KO_DOCKER_REPO)}} ko build -t {{quote(IMAGE_TAGS)}} --bare github.com/linode/linode-rdma-ipam
+    tags="{{ IMAGE_TAGS }}"
+    if [ -z "$tags" ]; then; tags=$(git rev-parse --abbrev-ref HEAD); fi
+    KOCACHE={{quote(KOCACHE)}} KO_DOCKER_REPO={{quote(KO_DOCKER_REPO)}} ko build -t "$tags" --bare github.com/linode/linode-rdma-ipam
 
 # Run the full test suite.
 test:
-    go test ./... -count=1 -race -timeout 60s -v
+    go test ./... -count=1 -race -timeout 60s  -cover -coverprofile=coverage.out -outputdir=. -coverpkg=./...
 
 # Run tests with coverage output.
-cover:
-    go test ./... -count=1 -race -timeout 60s -coverprofile=coverage.out
-    go tool cover -func=coverage.out
+cover: test
+	go tool cover -html coverage.out -o coverage.html
 
 # Format Go sources.
 fmt:
@@ -93,7 +95,20 @@ helm-install:
         --namespace {{quote(HELM_NAMESPACE)}} \
         --create-namespace \
         --set image.repository={{quote(KO_DOCKER_REPO)}} \
-        --set image.tag={{quote(VERSION)}}
+        --set image.tag={{quote(IMAGE_VERSION)}}
+
+# Stamp a version into the chart metadata and controller image tag
+set-chart-version version=IMAGE_VERSION:
+	#!/usr/bin/env bash
+	set -euo pipefail
+	if [ -z "{{ version }}" ]; then
+		echo "IMAGE_VERSION is required, e.g. just set-chart-version v0.1.6" >&2
+		exit 1
+	fi
+	for chart in ./charts/*/Chart.yaml; do
+		IMAGE_VERSION="{{ version }}" yq -i '.version = strenv(IMAGE_VERSION) | .appVersion = strenv(IMAGE_VERSION)' "$chart"
+	done
+	IMAGE_VERSION="{{ version }}" yq -i '.controller.image.tag = strenv(IMAGE_VERSION)' ./charts/linode-rdma-ipam/values.yaml
 
 # Package the versioned Helm chart for a tagged release.
 release:
