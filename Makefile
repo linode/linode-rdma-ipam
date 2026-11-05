@@ -166,3 +166,4 @@ $(NILAWAY): $(LOCALBIN)
 golangci-lint-custom: $(GOLANGCI_LINT_CUSTOM)
 $(GOLANGCI_LINT_CUSTOM): # Build golangci-lint-custom from custom configuration.
 	golangci-lint custom --version v$(shell mise current golangci-lint)
+

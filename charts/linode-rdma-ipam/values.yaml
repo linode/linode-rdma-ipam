@@ -8,3 +8,4 @@ pauseContainer:
   resources:
     limits:
       memory: 16Mi
+
