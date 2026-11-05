@@ -1,0 +1,11 @@
+apiVersion: v2
+name: linode-rdma-ipam
+description: Installs the Linode RDMA IPAM CNI binary on matching nodes.
+type: application
+version: 0.0.0
+appVersion: "latest"
+maintainers:
+  - name: linode
+home: https://github.com/linode/linode-rdma-ipam/
+sources:
+  - https://github.com/linode/linode-rdma-ipam/

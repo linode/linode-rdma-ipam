@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: linode-rdma-ipam-install
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: linode-rdma-ipam-install
+spec:
+  selector:
+    matchLabels:
+      app: linode-rdma-ipam-install
+  template:
+    metadata:
+      labels:
+        app: linode-rdma-ipam-install
+    spec:
+      nodeSelector:
+        feature.node.kubernetes.io/pci-15b3.present: "true"
+      initContainers:
+        - name: install-cni-bin
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["cp", "/linode-rdma-ipam", "/host/opt/cni/bin/linode-rdma-ipam"]
+          volumeMounts:
+            - name: cnibin
+              mountPath: /host/opt/cni/bin
+      containers:
+        - name: pause
+          image: {{ .Values.pauseContainer.image }}
+          {{- with .Values.pauseContainer.resources }}
+          resources:
+          {{ toYaml . | nindent 12 }}
+          {{- end }}
+      volumes:
+        - name: cnibin
+          hostPath:
+            path: /opt/cni/bin
+            type: Directory

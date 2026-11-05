@@ -5,7 +5,6 @@ REGISTRY            ?= docker.io/linode
 IMAGE_NAME          ?= linode-rdma-ipam
 VERSION             ?= $(shell git describe --always --tag --dirty=-dev)
 IMAGE_TAGS          ?= $(VERSION)
-WITH_GOFLAGS        ?= GOFLAGS=-ldflags=-X=github.com/linode/linode-rdma-ipam/version.version=$(VERSION)
 KO_DOCKER_REPO      ?= docker.io/linode/linode-rdma-ipam
 KOCACHE             ?= $(HOME)/.ko
 # ko's --local path uses DOCKER_HOST directly rather than Docker CLI contexts.
@@ -68,15 +67,15 @@ help: ## Display this help.
 
 .PHONY: build
 build: fmt vet ## Build manager binary.
-	go build -ldflags="-X github.com/linode/linode-rdma-ipam/version.version=$(VERSION)" -o ./bin/linode-rdma-ipam .
+	go build -o ./bin/linode-rdma-ipam .
 
 .PHONY: ko-build
 ko-build:
-	DOCKER_HOST=$(DOCKER_HOST) $(WITH_GOFLAGS) KOCACHE=$(KOCACHE) ko build --local -t $(IMAGE_TAGS) --bare github.com/linode/linode-rdma-ipam
+	DOCKER_HOST=$(DOCKER_HOST) KOCACHE=$(KOCACHE) ko build --local -t $(IMAGE_TAGS) --bare github.com/linode/linode-rdma-ipam
 
 .PHONY: ko-publish
 ko-publish:
-	$(WITH_GOFLAGS) KOCACHE=$(KOCACHE) KO_DOCKER_REPO=$(KO_DOCKER_REPO) ko build -t $(IMAGE_TAGS) --bare github.com/linode/linode-rdma-ipam
+	KOCACHE=$(KOCACHE) KO_DOCKER_REPO=$(KO_DOCKER_REPO) ko build -t $(IMAGE_TAGS) --bare github.com/linode/linode-rdma-ipam
 
 ## --------------------------------------
 ## Testing
@@ -131,8 +130,12 @@ vulncheck: ## Run vulnerability check against code.
 ##@ Deployment:
 
 ## install/upgrade the Helm chart using the current image (IMG).
+.PHONY: helm-install
+HELM_NAMESPACE ?= nvidia-network-operator
 helm-install:
 	helm upgrade --install linode-rdma-ipam charts/linode-rdma-ipam \
+		--namespace $(HELM_NAMESPACE) \
+		--create-namespace \
 		--set image.repository=$(KO_DOCKER_REPO) \
 		--set image.tag=$(VERSION)
 

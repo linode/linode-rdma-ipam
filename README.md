@@ -27,8 +27,12 @@ where this plugin actually executes as a real CNI invocation.
    registry-based push is the correct path once this scales beyond a
    handful of nodes, but adds a dependency (registry credentials/URL) not
    currently part of this setup.
-3. Apply `manifests/linode-rdma-ipam-install.yaml` - a `DaemonSet` that
-   copies the binary into `/opt/cni/bin` on every matching node (same
-   pattern as the `cni-plugins-ds`/`kube-multus-ds` DaemonSets already
-   running in this cluster) and self-heals on node reboot/replacement.
-4. Confirm `/opt/cni/bin/linode-rdma-ipam` exists on both nodes.
+3. If migrating from the previous manifest-based install, remove its
+   unmanaged `DaemonSet` first so Helm can create and manage it:
+   `kubectl delete daemonset linode-rdma-ipam-install -n nvidia-network-operator`.
+4. Run `make helm-install` to install or upgrade the chart in
+   `nvidia-network-operator`. It copies the binary into `/opt/cni/bin` on
+   every matching node (the same pattern as the `cni-plugins-ds`/
+   `kube-multus-ds` DaemonSets already running in this cluster) and self-heals
+   on node reboot or replacement.
+5. Confirm `/opt/cni/bin/linode-rdma-ipam` exists on both nodes.
