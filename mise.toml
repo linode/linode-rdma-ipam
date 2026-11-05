@@ -79,3 +79,8 @@ run = "just helm-install"
 [tasks.release]
 description = "[release] Package the versioned Helm chart."
 run = "just release"
+
+[tasks.set-chart-version]
+description = "[release] Stamp a version into the chart metadata and image tag."
+usage = 'arg "<version>"'
+run = 'just set-chart-version "$usage_version"'

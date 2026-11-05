@@ -13,8 +13,6 @@ NILAWAY := env_var_or_default("NILAWAY", LOCALBIN + "/nilaway")
 GOLANGCI_LINT_CUSTOM := env_var_or_default("GOLANGCI_LINT_CUSTOM", CACHE_BIN + "/golangci-lint-custom")
 NILAWAY_VERSION := env_var_or_default("NILAWAY_VERSION", "d2274102dc2eab9f77cef849a5470a6ebf983125")
 
-ONESHELL:
-
 # Run checks and build the binary.
 default: help
 all: check build
@@ -32,14 +30,18 @@ build: fmt vet
 
 # Build the image locally with ko.
 ko-build:
+    #!/usr/bin/env bash
+    set -euo pipefail
     tags="{{ IMAGE_TAGS }}"
-    if [ -z "$tags" ]; then; tags=$(git rev-parse --abbrev-ref HEAD); fi
+    if [ -z "$tags" ]; then tags=$(git rev-parse --abbrev-ref HEAD); fi
     DOCKER_HOST={{quote(DOCKER_HOST)}} KOCACHE={{quote(KOCACHE)}} ko build --local -t "$tags" --bare github.com/linode/linode-rdma-ipam
 
 # Build and push the image with ko.
 ko-publish:
+    #!/usr/bin/env bash
+    set -euo pipefail
     tags="{{ IMAGE_TAGS }}"
-    if [ -z "$tags" ]; then; tags=$(git rev-parse --abbrev-ref HEAD); fi
+    if [ -z "$tags" ]; then tags=$(git rev-parse --abbrev-ref HEAD); fi
     KOCACHE={{quote(KOCACHE)}} KO_DOCKER_REPO={{quote(KO_DOCKER_REPO)}} ko build -t "$tags" --bare github.com/linode/linode-rdma-ipam
 
 # Run the full test suite.
@@ -108,7 +110,7 @@ set-chart-version version=IMAGE_VERSION:
 	for chart in ./charts/*/Chart.yaml; do
 		IMAGE_VERSION="{{ version }}" yq -i '.version = strenv(IMAGE_VERSION) | .appVersion = strenv(IMAGE_VERSION)' "$chart"
 	done
-	IMAGE_VERSION="{{ version }}" yq -i '.controller.image.tag = strenv(IMAGE_VERSION)' ./charts/linode-rdma-ipam/values.yaml
+	IMAGE_VERSION="{{ version }}" yq -i '.image.tag = strenv(IMAGE_VERSION)' ./charts/linode-rdma-ipam/values.yaml
 
 # Package the versioned Helm chart for a tagged release.
 release:

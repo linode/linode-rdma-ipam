@@ -1,5 +1,5 @@
 image:
-  repository: linode-rdma-ipam
+  repository: docker.io/linode/linode-rdma-ipam
   tag: latest
   pullPolicy: IfNotPresent
 

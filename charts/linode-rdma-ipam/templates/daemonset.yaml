@@ -20,7 +20,7 @@ spec:
         - name: install-cni-bin
           image: {{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command: ["cp", "/linode-rdma-ipam", "/host/opt/cni/bin/linode-rdma-ipam"]
+          command: ["cp", "/ko-app/linode-rdma-ipam", "/host/opt/cni/bin/linode-rdma-ipam"]
           volumeMounts:
             - name: cnibin
               mountPath: /host/opt/cni/bin
@@ -29,7 +29,7 @@ spec:
           image: {{ .Values.pauseContainer.image }}
           {{- with .Values.pauseContainer.resources }}
           resources:
-          {{ toYaml . | nindent 12 }}
+          {{- toYaml . | nindent 12 }}
           {{- end }}
       volumes:
         - name: cnibin
