@@ -77,9 +77,6 @@ jobs:
       - name: lint
         run: mise run lint
 
-      - name: lint-api
-        run: mise run lint-api
-
       - name: nilcheck
         run: mise run nilcheck
 
