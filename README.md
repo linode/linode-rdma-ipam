@@ -30,7 +30,7 @@ where this plugin actually executes as a real CNI invocation.
 3. If migrating from the previous manifest-based install, remove its
    unmanaged `DaemonSet` first so Helm can create and manage it:
    `kubectl delete daemonset linode-rdma-ipam-install -n nvidia-network-operator`.
-4. Run `make helm-install` to install or upgrade the chart in
+4. Run `mise run helm-install` to install or upgrade the chart in
    `nvidia-network-operator`. It copies the binary into `/opt/cni/bin` on
    every matching node (the same pattern as the `cni-plugins-ds`/
    `kube-multus-ds` DaemonSets already running in this cluster) and self-heals

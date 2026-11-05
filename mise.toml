@@ -2,11 +2,17 @@
 minimum_release_age = "7d"  # only install versions released more than 7 days ago - https://mise.en.dev/security.html#minimum-release-age
 
 [tools]
+python = "3.15.1"
 go = "1.27.3"
+helm = "3.22.1"
+just = "1.46.0"
 ko = "0.18.1"
 kubectl = "1.35.5"
 "go:golang.org/x/vuln/cmd/govulncheck" = "1.8.0"
 golangci-lint = "2.15.0"
+"aqua:helm/chart-testing" = "3.15.0"
+"pipx:yamale" = "6.1.0"
+"pipx:yamllint" = "1.38.0"
 
 
 [tasks.check]
@@ -19,40 +25,57 @@ run = [{ task = "lint" }, { task = "nilcheck" }, { task = "vulncheck" }, { task 
 
 [tasks.fmt]
 description = "[check] Format Go sources in place."
-run = "make fmt"
+run = "just fmt"
 
 [tasks.vet]
 description = "[check] Run go vet."
-run = "make vet"
+run = "just vet"
 
 [tasks.lint]
 description = "[check] Run golangci-lint."
-run = "make lint"
+run = "just lint"
 
 [tasks.vulncheck]
 description = "[verify] Run govulncheck (requires network)."
-run = "make vulncheck"
+run = "just vulncheck"
 
 [tasks.test]
 description = "[verify] Regenerate and format code, then run race-enabled unit tests; writes cover.out."
-run = "make test"
+run = "just test"
 
 [tasks.build]
 description = "[verify] Regenerate and format code, then build bin/manager."
-run = "make build"
+run = "just build"
+
+[tasks.cover]
+description = "[verify] Run race-enabled tests with coverage output."
+run = "just cover"
 
 [tasks.tidy]
 description = "[dev] Run go mod tidy. Mutates go.mod and go.sum; needs network."
-run = "make tidy"
+run = "just tidy"
 
 [tasks.nilcheck]
 description = "[verify] Run nilaway; builds bin/golangci-lint-custom if absent."
-run = "make nilcheck"
+run = "just nilcheck"
 
 [tasks.ko-build]
 description = "[dev] Build the controller image locally with ko. Does not push."
-run = "make ko-build"
+run = "just ko-build"
 
 [tasks.ko-publish]
 description = "[dev] Build and push the controller image to KO_DOCKER_REPO. Publishes; run only when asked."
-run = "make ko-publish"
+run = "just ko-publish"
+
+[tasks.lint-chart]
+description = "Run Helm chart linting"
+run = "just lint-chart"
+sources = ['charts/**/*'] # skip running if these files haven't changed
+
+[tasks.helm-install]
+description = "[deploy] Install or upgrade the Helm chart."
+run = "just helm-install"
+
+[tasks.release]
+description = "[release] Package the versioned Helm chart."
+run = "just release"
