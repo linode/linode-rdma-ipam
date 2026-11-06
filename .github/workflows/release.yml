@@ -1,0 +1,49 @@
+name: Release
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Set up Mise
+        uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d # v4.2.0
+
+      - name: Create Release Artifacts
+        run: mise run release
+        env:
+          IMAGE_VERSION: ${{ github.ref_name }}
+
+      - name: Upload Release Artifacts
+        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3.0.0
+        with:
+          files: |
+            ./release/helm-chart-${{ github.ref_name }}.tgz
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        env:
+          DOCKERHUB_OIDC_CONNECTIONID: ${{ secrets.DOCKERHUB_OIDC_CONNECTIONID }}
+        with:
+          username: ${{ github.repository_owner }}
+
+      - name: Build and Push to Docker Hub with ko
+        run: mise run ko-publish
+        env:
+          KO_DOCKER_REPO: docker.io/linode/linode-rdma-ipam
+          IMAGE_TAGS: ${{ github.ref_name }}

@@ -1,0 +1,5 @@
+# The install DaemonSet's initContainer runs `cp`, so the base image must ship one.
+defaultBaseImage: busybox:stable
+defaultPlatforms:
+  - linux/arm64
+  - linux/amd64

@@ -10,7 +10,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"linode-rdma-ipam/pkg/networkd"
+	"github.com/linode/linode-rdma-ipam/pkg/networkd"
 )
 
 // DefaultNetworkdDir is where Linode's Network Helper writes per-interface
@@ -27,17 +27,25 @@ func Resolve(ifName, networkdDir string) (netip.Prefix, error) {
 		return netip.Prefix{}, errors.New("resolve: interface name must not be empty")
 	}
 
-	path := filepath.Join(networkdDir, fmt.Sprintf("05-%s.network", ifName))
+	filename := fmt.Sprintf("05-%s.network", ifName)
+	if !filepath.IsLocal(filename) || filepath.Base(filename) != filename {
+		return netip.Prefix{}, fmt.Errorf("resolve: invalid interface name %q", ifName)
+	}
+	path := filepath.Join(networkdDir, filename)
 
-	f, err := os.Open(path)
+	//nolint:gosec // G304: filename is a local component under the configured networkd directory.
+	networkFile, err := os.Open(path)
 	if err != nil {
 		return netip.Prefix{}, fmt.Errorf("resolve: no network config found for interface %q at %s: %w", ifName, path, err)
 	}
-	defer f.Close()
 
-	prefix, err := networkd.ParseAddress(f)
-	if err != nil {
-		return netip.Prefix{}, fmt.Errorf("resolve: interface %q (%s): %w", ifName, path, err)
+	prefix, parseErr := networkd.ParseAddress(networkFile)
+	closeErr := networkFile.Close()
+	if parseErr != nil {
+		return netip.Prefix{}, fmt.Errorf("resolve: interface %q (%s): %w", ifName, path, errors.Join(parseErr, closeErr))
+	}
+	if closeErr != nil {
+		return netip.Prefix{}, fmt.Errorf("resolve: close network config for interface %q (%s): %w", ifName, path, closeErr)
 	}
 
 	return prefix, nil

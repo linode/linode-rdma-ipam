@@ -9,13 +9,15 @@ import (
 )
 
 func TestParseAddress_RealFixture(t *testing.T) {
-	f, err := os.Open("../../testdata/05-rdma0.network")
+	t.Parallel()
+
+	fixtureFile, err := os.Open("../../testdata/05-rdma0.network")
 	if err != nil {
 		t.Fatalf("open fixture: %v", err)
 	}
-	defer f.Close()
+	defer fixtureFile.Close()
 
-	got, err := ParseAddress(f)
+	got, err := ParseAddress(fixtureFile)
 	if err != nil {
 		t.Fatalf("ParseAddress: %v", err)
 	}
@@ -27,19 +29,23 @@ func TestParseAddress_RealFixture(t *testing.T) {
 }
 
 func TestParseAddress_NoAddressFixture(t *testing.T) {
-	f, err := os.Open("../../testdata/05-rdma-no-address.network")
+	t.Parallel()
+
+	fixtureFile, err := os.Open("../../testdata/05-rdma-no-address.network")
 	if err != nil {
 		t.Fatalf("open fixture: %v", err)
 	}
-	defer f.Close()
+	defer fixtureFile.Close()
 
-	_, err = ParseAddress(f)
+	_, err = ParseAddress(fixtureFile)
 	if !errors.Is(err, ErrNoAddress) {
 		t.Fatalf("got err %v, want ErrNoAddress", err)
 	}
 }
 
 func TestParseAddress_TableDriven(t *testing.T) {
+	t.Parallel()
+
 	cases := []struct {
 		name    string
 		content string
@@ -134,6 +140,8 @@ func TestParseAddress_TableDriven(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
 			got, err := ParseAddress(strings.NewReader(tc.content))
 			if tc.wantErr != nil {
 				if !errors.Is(err, tc.wantErr) {

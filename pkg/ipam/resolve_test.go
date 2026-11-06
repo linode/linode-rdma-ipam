@@ -17,6 +17,8 @@ func writeFixture(t *testing.T, dir, name, content string) {
 }
 
 func TestResolve_Success(t *testing.T) {
+	t.Parallel()
+
 	dir := t.TempDir()
 	writeFixture(t, dir, "05-rdma0.network", "[Network]\nAddress=192.0.2.18/24\n")
 
@@ -32,6 +34,8 @@ func TestResolve_Success(t *testing.T) {
 }
 
 func TestResolve_MissingFile(t *testing.T) {
+	t.Parallel()
+
 	dir := t.TempDir()
 
 	_, err := Resolve("rdma7", dir)
@@ -49,6 +53,8 @@ func TestResolve_MissingFile(t *testing.T) {
 }
 
 func TestResolve_FileWithNoAddress(t *testing.T) {
+	t.Parallel()
+
 	dir := t.TempDir()
 	writeFixture(t, dir, "05-rdma3.network", "[Network]\nDHCP=no\n")
 
@@ -59,10 +65,21 @@ func TestResolve_FileWithNoAddress(t *testing.T) {
 }
 
 func TestResolve_EmptyIfName(t *testing.T) {
+	t.Parallel()
+
 	dir := t.TempDir()
 
 	_, err := Resolve("", dir)
 	if err == nil {
 		t.Fatal("expected an error for an empty interface name, got nil")
+	}
+}
+
+func TestResolve_RejectsInterfaceNameWithPathComponents(t *testing.T) {
+	t.Parallel()
+
+	_, err := Resolve("rdma0/../../etc/passwd", t.TempDir())
+	if err == nil || !strings.Contains(err.Error(), "invalid interface name") {
+		t.Fatalf("Resolve error = %v, want invalid interface name", err)
 	}
 }
