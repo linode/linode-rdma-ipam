@@ -21,3 +21,16 @@ where this plugin actually executes as a real CNI invocation.
 ## Usage
 
 The release binary will be present on LKE nodes under `/opt/cni/bin/linode-rdma-ipam`. LKE will use this CNI plugin as needed.
+
+
+## 🚧 Disclaimers
+
+- **The CNI plugin is in alpha.** Behavior may change between releases.
+
+## 💬 Join Us on Slack
+
+- **General Help/Discussion**: [Kubernetes Slack - #linode](https://kubernetes.slack.com/messages/CD4B15LUR)
+
+## License
+
+This project is licensed under the Apache License, Version 2.0.
