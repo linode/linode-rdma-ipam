@@ -2,17 +2,11 @@
 minimum_release_age = "7d"  # only install versions released more than 7 days ago - https://mise.en.dev/security.html#minimum-release-age
 
 [tools]
-python = "3.15.1"
 go = "1.27.3"
-helm = "3.22.1"
 just = "1.46.0"
-ko = "0.18.1"
 kubectl = "1.35.5"
 "go:golang.org/x/vuln/cmd/govulncheck" = "1.8.0"
 golangci-lint = "2.15.0"
-"aqua:helm/chart-testing" = "3.15.0"
-"pipx:yamale" = "6.1.0"
-"pipx:yamllint" = "1.38.0"
 
 
 [tasks.check]
@@ -58,29 +52,3 @@ run = "just tidy"
 [tasks.nilcheck]
 description = "[verify] Run nilaway; builds bin/golangci-lint-custom if absent."
 run = "just nilcheck"
-
-[tasks.ko-build]
-description = "[dev] Build the controller image locally with ko. Does not push."
-run = "just ko-build"
-
-[tasks.ko-publish]
-description = "[dev] Build and push the controller image to KO_DOCKER_REPO. Publishes; run only when asked."
-run = "just ko-publish"
-
-[tasks.lint-chart]
-description = "Run Helm chart linting"
-run = "just lint-chart"
-sources = ['charts/**/*'] # skip running if these files haven't changed
-
-[tasks.helm-install]
-description = "[deploy] Install or upgrade the Helm chart."
-run = "just helm-install"
-
-[tasks.release]
-description = "[release] Package the versioned Helm chart."
-run = "just release"
-
-[tasks.set-chart-version]
-description = "[release] Stamp a version into the chart metadata and image tag."
-usage = 'arg "<version>"'
-run = 'just set-chart-version "$usage_version"'
